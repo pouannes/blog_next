@@ -21,7 +21,7 @@ const Head = ({ customMeta }: { customMeta?: MetaProps }): JSX.Element => {
       <meta content={meta.description} name="description" />
       <meta property="og:url" content={`${WEBSITE_HOST_URL}${router.asPath}`} />
       <link rel="canonical" href={`${WEBSITE_HOST_URL}${router.asPath}`} />
-      <link rel="shortcut icon" href="/PO.svg" />
+      <link rel="shortcut icon" href="/PO3.svg" />
       <meta property="og:type" content={meta.type} />
       <meta property="og:site_name" content="Pierre Ouannes - Website" />
       <meta property="og:description" content={meta.description} />
