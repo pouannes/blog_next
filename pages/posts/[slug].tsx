@@ -47,7 +47,7 @@ const PostPage = ({ source, frontMatter }: PostPageProps): JSX.Element => {
     type: 'article',
   };
 
-  return (
+  return process.env.NODE_ENV !== 'development' && frontMatter.draft ? null : (
     <Layout customMeta={customMeta} addMath={!!frontMatter?.hasMath}>
       <article>
         <h1 className="mb-3 text-gray-900 dark:text-white">
@@ -108,7 +108,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
     .map((path) => path.replace(/\.mdx?$/, ''))
     // Map the path into the static paths object required by Next.js
     .map((slug) => ({ params: { slug } }));
-
   return {
     paths,
     fallback: false,

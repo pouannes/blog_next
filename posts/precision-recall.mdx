@@ -44,7 +44,7 @@ Please be sure to fully understand what those are before reading further. These 
 
 Let's see how to compute those values in code. Suppose we have patients IDs, whether or not they have the disease, and the classifier prediction stored in a pandas DataFrame called `df`. The convention here is 1 to indicate the disease, 0 for no disease.
 
-<table border="1" class="dataframe">
+<table border="1" className="dataframe">
   <thead>
     <tr style={{ textAlign: 'right' }}>
       <th>id</th>
@@ -97,7 +97,7 @@ df.loc[(df['disease'] == 0) & (df['prediction'] == 1), 'confusion'] = 'FP'
 
 We now have a column called "confusion" with the confusion information.
 
-<table border="1" class="dataframe">
+<table border="1" className="dataframe">
   <thead>
     <tr style={{ textAlign: 'right' }}>
       <th>id</th>

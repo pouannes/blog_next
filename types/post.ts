@@ -4,5 +4,6 @@ export type PostType = {
   image?: string;
   slug: string;
   title: string;
+  draft?: boolean;
   hasMath?: boolean;
 };

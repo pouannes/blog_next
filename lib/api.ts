@@ -38,7 +38,10 @@ export function getPostBySlug(slug: string, fields: string[] = []): PostItems {
 export function getAllPosts(fields: string[] = []): PostItems[] {
   const slugs = getPostSlugs();
   const posts = slugs
-    .map((slug) => getPostBySlug(slug, fields))
+    .map((slug) => getPostBySlug(slug, [...fields, 'draft']))
+    .filter((post) =>
+      process.env.NODE_ENV === 'development' ? true : !post.draft
+    )
     // sort posts by date in descending order
     .sort((post1, post2) => (post1.date > post2.date ? -1 : 1));
   return posts;
