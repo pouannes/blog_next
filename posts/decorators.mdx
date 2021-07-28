@@ -1,0 +1,368 @@
+---
+title: 'Finally understanding decorators in Python'
+date: '2019-03-19'
+tags: ['python']
+layout: post
+type: 'post'
+draft: false
+---
+
+Python is a very beginner-friendly language. However, it also has some more advanced features that can be hard to grasp. For me at least, decorators were one of them. I was seeing them here and there but never fully understood what they did and how they worked, even after reading a bunch of stuff about them. Until I came across the [talk 'So you want to be a Python expert' by James Powell](https://www.youtube.com/watch?v=cKPlPJyQrt4) in which he explains four key features of Python, including decorators. This article aims to put in writing the essence of the part of his talk about decorators.
+
+Maybe you've not been in the Python ecosystem long enough to know what a decorator is, or you've encountered it but you didn't know what it was. A decorator is the little at-something on top of a function definition, like so:
+
+```python
+@dec
+def func():
+  pass
+```
+
+The best way to understand decorators is to understand what problem they solve. Bear with me, we'll get to decorators at the end and all will be clear.
+
+### Setting up the problem
+
+We are going to play with a mock example in order to understand the purpose of decorators.
+Let's say you have a simple function that add stuff in a file called `dec.py`, with a default value for the second parameter of 10:
+
+```python
+# dec.py
+
+def add(x, y=10):
+  return x + y
+```
+
+Let's take a closer look at the `add` function itself:
+
+```python
+>>> add(10, 20)
+30
+>>> add
+<function add at 0x7fce0da2fe18>
+>>> add.__name__
+'add'
+>>> add.__module__
+'__main__'
+>>> add.__defaults__ # default value of the `add` function
+(10,)
+>>> add.__code__.co_varnames # the variable names of the `add` function
+('x', 'y')
+```
+
+No need to understand what all of those are, the main thing to remember is that every function in python is a live thing that you can play with. You can also look at the source code for example, with the inspect module:
+
+```python
+>>> from inspect import getsource
+>>> print(getsource(add))
+def add(x, y=10):
+  return x + y
+```
+
+Now let's say you use the `add` function in some way, for example you test it with a bunch of operations:
+
+```python
+# dec.py
+from time import time
+
+def add(x, y=10):
+  return x + y
+
+print('add(10)',         add(10))
+print('add(20, 30)',     add(20, 30))
+print('add("a", "b")',   add("a", "b"))
+```
+
+Output: i
+
+```python
+add(10) 20
+add(20, 30) 50
+add("a", "b") ab
+```
+
+And let's say you want to time each of these operations, using the `time` module for example:
+
+```python
+# dec.py
+from time import time
+
+
+def add(x, y=10):
+  return x + y
+
+before = time()
+print('add(10)',         add(10))
+after = time()
+print('time taken: ', after - before)
+before = time()
+print('add(20, 30)',     add(20, 30))
+after = time()
+print('time taken: ', after - before)
+before = time()
+print('add("a", "b")',   add("a", "b"))
+after = time()
+print('time taken: ', after - before)
+```
+
+Output:
+
+```python
+add(10) 20
+time taken:  6.699562072753906e-05
+add(20, 30) 50
+time taken:  6.9141387939453125e-06
+add("a", "b") ab
+time taken:  6.9141387939453125e-06
+```
+
+Now your programmer senses are itching because we are all taught to hate copy-paste, and for good reasons. It's not very readable, and if you want to change something you have to change it everywhere. There must be a better way.
+
+We could do something like this instead, to capture the time directly in the `add` function:
+
+```python
+# dec.py
+from time import time
+
+def add(x, y=10):
+  before = time()
+  rv = x + y
+  after = time()
+  print('time taken: ', after - before)
+  return rv
+
+print('add(10)',         add(10))
+print('add(20, 30)',     add(20, 30))
+print('add("a", "b")',   add("a", "b"))
+```
+
+That would be definitely better than before. However if you have another function, this doesn't feel right anymore. And you could have many more functions:
+
+```python
+# dec.py
+from time import time
+
+def add(x, y=10):
+  before = time()
+  rv = x + y
+  after = time()
+  print('time taken: ', after - before)
+  return rv
+
+def sub(x, y=10):
+  return x - y
+
+print('add(10)',         add(10))
+print('add(20, 30)',     add(20, 30))
+print('add("a", "b")',   add("a", "b"))
+print('sub(10)',         sub(10))
+print('sub(20, 30)',     sub(20, 30))
+```
+
+Remember, both `add` and `sub` are functions. Let's take advantage of this and write a `timer` function. `timer` takes a function, times it while computing the output, and returns the outputs:
+
+```python
+def timer(func, x, y=10):
+  before = time()
+  rv = func(x, y)
+  after = time()
+  print('time taken: ', after - before)
+  return rv
+```
+
+That's good, but we'll have to wrap everything with this `timer` function, like so:
+
+```python
+print('add(10)',         timer(add,10)))
+```
+
+And the default value is now `10`? Not pretty. How to do better?
+
+Here's an idea: let's create a new `timer` function that wraps around other functions, and returns the wrapped function:
+
+```python
+def timer(func):
+  def f(x, y=10):
+    before = time()
+    rv = func(x, y)
+    after = time()
+    print('time taken: ', after - before)
+    return rv
+  return f
+```
+
+Now you just need to wrap `add` and `sub` with `timer`, with:
+
+```python
+add = timer(add)
+```
+
+and it should work! Here's the full code:
+
+```python
+# dec.py
+from time import time
+def timer(func):
+  def f(x, y=10):
+    before = time()
+    rv = func(x, y)
+    after = time()
+    print('time taken: ', after - before)
+    return rv
+  return f
+
+def add(x, y=10):
+  return x + y
+add = timer(add)
+
+
+def sub(x, y=10):
+  return x - y
+sub = timer(sub)
+
+print('add(10)',         add(10))
+print('add(20, 30)',     add(20, 30))
+print('add("a", "b")',   add("a", "b"))
+print('sub(10)',         sub(10))
+print('sub(20, 30)',     sub(20, 30))
+```
+
+Output:
+
+```python
+time taken:  0.0
+add(10) 20
+time taken:  9.5367431640625e-07
+add(20, 30) 50
+time taken:  0.0
+add("a", "b") ab
+time taken:  9.5367431640625e-07
+sub(10) 0
+time taken:  9.5367431640625e-07
+sub(20, 30) -10
+```
+
+So what did we do? We had a function (like `add`), and we wrapped it with a behavior (for example time it). We created a new function (`timer`), that takes the original function and wraps it with a bit of new behavior and returns the new function. Pretty useful eh?
+
+Of course, there's still the issue of the default values. We'll tackle it a bit later.
+
+## Decorators!
+
+That pattern of wrapping functions with new, common behavior is exactly what decorators are. Instead of writing:
+
+```python
+def add(x, y=10):
+  return x + y
+add = timer(add)
+```
+
+You write:
+
+```python
+@timer
+def add(x, y=10):
+  return x + y
+```
+
+But it's **_exactly the same thing._** That's what a decorator is in Python. It's simply a syntax for saying `add = timer(add)`, but instead of putting it at the end of the function you put it at the top with the simpler syntax `@timer`.
+
+Here's what the example would look like now:
+
+```python
+# dec.py
+from time import time
+def timer(func):
+  def f(x, y=10):
+    before = time()
+    rv = func(x, y)
+    after = time()
+    print('time taken: ', after - before)
+    return rv
+  return f
+
+@timer
+def add(x, y=10):
+  return x + y
+
+@timer
+def sub(x, y=10):
+  return x - y
+
+print('add(10)',         add(10))
+print('add(20, 30)',     add(20, 30))
+print('add("a", "b")',   add("a", "b"))
+print('sub(10)',         sub(10))
+print('sub(20, 30)',     sub(20, 30))
+```
+
+## args and kwargs
+
+Now there's still one small detail left that isn't quite right. In the `timer` function, we hard-coded the parameters `x` and `y`, and even the default `y=10`. There's a way to pass the arguments and the key-word arguments for the function, with `*args` and `**kwargs`. To be clear, the arguments are the standard arguments of a function (in this case `x` is an argument), while the key-word arguments are the argument that already have a default value (like `y=10` here). Here's the code:
+
+```python
+# dec.py
+from time import time
+def timer(func):
+  def f(*args, **kwargs):
+    before = time()
+    rv = func(*args, **kwargs)
+    after = time()
+    print('time taken: ', after - before)
+    return rv
+  return f
+
+@timer
+def add(x, y=10):
+  return x + y
+
+@timer
+def sub(x, y=10):
+  return x - y
+
+print('add(10)',         add(10))
+print('add(20, 30)',     add(20, 30))
+print('add("a", "b")',   add("a", "b"))
+print('sub(10)',         sub(10))
+print('sub(20, 30)',     sub(20, 30))
+```
+
+Now the `timer` function works with any function, with any parameter and any set of defaults, because it just forwards the parameters to the function.
+
+## Higher order decorators
+
+Some of you may already wonder at this point: wait... If we can wrap one function inside a function to add useful behavior, could we go one step further? Could we wrap a function inside a function, inside another function?
+
+Yes! In fact you can go as deep as you want (although usually you won't need to go any deeper than this). For example, let's say you want to write a decorator to execute a function `n` times. Here's what it would look like:
+
+```python
+def ntimes(n):
+  def inner(f):
+    def wrapper(*args, **kwargs):
+      for _ in range(n):
+        rv = f(*args, **kwargs)
+      return rv
+    return wrapper
+  return inner
+```
+
+You can then wrap functions with this, for example with the earlier `add` function:
+
+```python
+@ntimes(3)
+def add(x, y):
+  print(x + y)
+  return x + y
+```
+
+A `print` statement was added to show that the code indeed execute 3 times, otherwise the `@ntimes` wouldn't do a lot.
+
+## Recap
+
+So let recap what a decorator is:
+
+- It's a function that wraps another function;
+- It takes a function as a parameter;
+- It returns a function;
+- It's identical as putting `func = dec(func)` after the definition of `func`, but a more convenient method is putting `@dec` just above the definition of `func`.
+
+I hope this has helped you to understand decorators in Python!
+
+Please feel free to contact me on Twitter if you have any question.

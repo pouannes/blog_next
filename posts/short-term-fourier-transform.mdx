@@ -1,0 +1,26 @@
+---
+title: 'A Soft introduction to Short Term Fourier Transform for signal analysis'
+date: '2019-03-29'
+tags: ['signal analysis', 'machine learning']
+layout: post
+type: 'post'
+draft: true
+---
+
+You've probably already heard the name "Fourier Transform", but maybe you're not too familiar with it is, what it means, and how we use it. Or maybe you remember what a Fourier Transform is, but you're wondering what a Short Term Fourier Transform (STFT) is.
+
+It turns out the Fourier Transform in general, and in particular the Short Term version, is one of the main pillar upon which the science of signal analysis was built. It's still very useful and widely used, even though we now have other tools at our disposal.
+
+Even before beginning to dig into what it is, you have to understand the one key concept behind Fourier Transform, as well as all the other kinds of transforms out there. Transforms are a way of looking at the same thing but from a different angle. You don't gain any information, and if you do things well you don't loose information neither. But you gain a different perspective on the same data, and with that new perspective comes a new and (hopefully) helpful understanding of it. Properties that were hard that were hard to guess become self-evident, and vice-versa.
+
+The Fourier Transform is one of the most popular way of looking at a signal "from a different angle".
+
+So, what is it about? At it's heart, the Fourier Transform is a way to analyze a signal not but looking at how it evolves over time, but by studying how repetitive it is through time.
+
+Let's look at a simple sinus wave:
+
+![a sin function](/STFT/simple_sin.png#center)
+
+What can you tell about this signal? Well, at a glance it seems like it's oscillating between -1 and 1, that it is periodic with a period of about... Let's around 200 ? Not really clear.
+
+Now let's look at its Fourier Transform:

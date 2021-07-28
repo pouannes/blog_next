@@ -1,0 +1,69 @@
+---
+title: 'The complete guide to Machine Learning metrics'
+date: '2019-01-28'
+layout: post
+type: 'post'
+draft: true
+hasMath: true
+---
+
+There's a lot of metrics used in Machine Learning. Each metric gives a specific information, and knowing which metric to choose and when is one of the key skill of a Data Scientist.
+
+Here's my guide to Machine Learning Metrics.
+
+### 1. Accuracy
+
+Accuracy is the most basic metric. It is simply
+
+$$
+accuracy = \frac{number\ of\ well\ classified\ inputs}{total\ number\ of\ inputs}
+$$
+
+### 2. Top k accuracy
+
+Top k accuracy is also frequently used. For a given input, the model outputs a list of probabilities for each class. For example, in a classification class for letters images, like MNIST, the model could output the following table of probabilities
+
+| Class       | A      | B      | C      | D      | E      | F      | G      | ... |
+| ----------- | ------ | ------ | ------ | ------ | ------ | ------ | ------ | --- |
+| Probability | 0.0012 | 0.0236 | 0.0045 | 0.0778 | 0.5495 | 0.0325 | 0.0287 |     |
+
+Then to calcule the top k accuracy, for each example you :
+
+1. find the k largest probabilities that the model output
+2. count it as correct if the target class is in those k probabilities.
+
+### 3, Error rate
+
+The error rate can be seen as the opposite of the accuracy. It is computed with
+
+$$
+error\ rate = 1 - accuracy = \frac{number\ of\ wrongly\ classified\ inputs}{total\ number\ of\ inputs}
+$$
+
+### 4. $F_\beta$ (include $F_1$ and dice)
+
+First let's look at the definition of $ F*1 $ (also know as the Dice coefficient), which is a special case of the $F*\beta$ metric. The definition of the $F\_1$ metric is the following :
+
+$$
+F_1 = \frac{2 \cdot TP}{2 \cdot TP + TN + FN}
+$$
+
+with the following meaning :
+
+### 5. Error_rate
+
+### 6. Mean Squared Error (MSE)
+
+### mean_absolute_error
+
+### mean_squared_logarithmic_error
+
+### exp_rmspe
+
+### root_mean_squared_error
+
+### fbeta
+
+### explained_variance
+
+### r2_score

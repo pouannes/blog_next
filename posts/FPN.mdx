@@ -1,0 +1,210 @@
+---
+title: 'Feature Pyramid Networks for Object Detection in depth, with code'
+date: '2019-01-28'
+layout: post
+type: 'post'
+draft: true
+---
+
+TODOS :
+
+- link and references
+- fact checking
+- proof reading
+- disclamair about Sylvain's code
+- images and breathers
+- Be consistent with anchor boxes / bounding boxes
+- explain with "rich semantic" mean for a feature map
+
+---
+
+Object Detection is a one of the very exciting field in computer vision. It is widely useful in the industry, from [enabling autonomous car technology](https://www.youtube.com/watch?v=wypE4fC56bg) to tracking [objects in manufacturing or retail](https://www.youtube.com/watch?v=yeS8TJwBAFs).
+
+There's a couple of very well performing architectures battling for the first place in Object Detection challenges. The main ones are [R-CNN](https://arxiv.org/abs/1311.2524) (and the variants like [Faster R-CNN](https://arxiv.org/abs/1506.01497)), [YOLO](https://arxiv.org/abs/1506.02640) (latest version is [YOLOv3](https://arxiv.org/abs/1804.02767)), [SSD](https://arxiv.org/abs/1512.02325) (latest version is [DSSD](https://arxiv.org/abs/1701.06659)) and [RetinaNet](https://arxiv.org/abs/1708.02002). Though quite different, those architectures achieve very similar results in speed and accuracy. RetinaNet is a bit more accurate but also slower than the two others (if interested in the comparaison of those architectures, the [YOLOv3](https://arxiv.org/abs/1804.02767) paper contains a tables with nearly of all the aforementioned models. The paper is also very funny and witty, I recommend reading it).
+
+In this blog post I'll go over one of the two main component of RetinaNet : [Feature Pyramid Network](https://arxiv.org/abs/1612.03144) which I'll abreviate as FPN. FPN is the first part of RetinaNet, which is about half of what makes this architecture so successful.
+
+In the first part I'll go over what FPN is and the intuitin behind its performance. Then we'll move on to how FPN could be implemented using PyTorch.
+
+## I. Understanding FPNs
+
+To understand FPNs, it's useful to first understand the problem FPNs are solving. Let's look at how Object Detection was working a few years ago, in from 2014 to 2017.
+
+### 1. A bit of history
+
+The state of the art in 2014 was the architecture called R-CNN, short for Region - Convolutionnal Neural Network. As I said in the introduction, R-CNN is still State of the Art today though not in its original form : it has evolved quite a bit since then.
+
+The original network is diferent from what we do today mainly because it's made of in two distinct stages. The first stage is called the Region Proposal Network, or RPN (the R of R-CNN). Its job is to scann through the image and identify regions of interest : parts of the image that could lead to an object detection if investigated more closely with a CNN doing classic image classification. The ouput of the RPN is thus a list of about 2 000 bounding boxes (a fancy word for rectangles) that could lead to the detection of an object. A bit of post-processing is done of those bounding boxes, for example merging small overlapping bounding boxes that are likely to be the same object. (TODO : check this post-processing) Then the second stage takes those region proposals and for each of them decides (with a conventionnal CNN) wether or not an object is present or not in the region.
+
+IMAGE of R-CNN's RPN
+
+It was a huge improvement over the previous methods (mainly a sliding window), but the fact it had two separate stages still made it quite slow. The next iteration of Object Detection architectures improved over R-CNN by merging those two stages into a single one. This new architecture is called SSD, for Single Shot Detector.
+
+Basically was SSD does is take the input and put it though a few convolutionnal layers to extract features. For each location of the resulting feature map, you have a certain number of bounding boxes, of predefined sizes and ratios. Those bounding boxes are then taken though the reste of the CNN to detect if an object is present or not. I know this might feel a bit abstract if you're not familiar with those concepts. Don't worry, it's hard to grasp them on the first try, or even the second or the third, and to explain them fully a complete blog post would required.
+
+What you need to understand though is that in the SSD architecture each bounding box is coming from the same feature map. Thus, even if the sizes of those bounding box vary slighlty inside the feature map, their receptive fields (TODO : citation needed) will be quite similar. Only objects of similar sizes will be detected by the network. Bigger objects could also be detected (because at the end there's a bit of post-processing that merges bounding boxes that are likely detecting the same object), but objects smaller than the smallest receptive field of the bouding boxes have very little chance of being correctly detected.
+
+The way SSD deals with that issue is to work on bounding boxes from different feature maps so they may have different receptive fields. However, the feature maps used are often small ones, late in the network, because they are feature-rich. Being feature-rich is good for detecting objects, and being small is good because there's less bounding boxes so less computation. However, those feature maps lack resolution as they are highly processed and thus they are still quite bad as detecting small objects.
+
+{{% notice note %}}
+**Rich semantics and high resolution** <br></br> What do I mean by rich semantics and high resolution ? TODO
+{{% /notice %}}
+
+To recap, SSD is great because it merges the two stages of R-CNN into a single one, making it way faster (and also more accurate, partly because it's easier to train). However, SSD has trouble with detecting objects of very different sizes, and in particular object of small sizes, because the bounding boxes proposal are made from small feature maps that are rich in semantic information but low in resolution.
+
+Feature Pyramid Networks can be seen as a way to improve upon SSD and solve the aforementioned issues.
+
+### 2. Feature Pyramid Networks overview
+
+They say an image is worth a thousands words so here is Feature Pyramid Netowrks.
+
+IMAGE of Feature Pyramid Network.
+
+As you can see, the right part is very similar to what SSD is doing. The input images is put through a standard CNN (ResNet is often used) from which the feature maps are extracted. SSD would stop here, put anchor boxes on those feature maps and go on. However, to solve the issues we've seen, FPN adds a 'top-down' path that begins from the latest feature map, and gradually up-sample it to make it bigger and to merge it with earlier feature maps (that are of higher resolution). Those merged feature maps, combining semantic-rich and high-resolution feature maps, are the ones that are used.
+
+That's it ! FPNs are basically the same as what the first part of the SSD network did, except that the last features maps are enriched with the first ones to have a higher resolution with respect to the input as well as rich semantics.
+
+The next parts of this article will be about working out the details of FPNs and how to implement them.
+
+## II. Feature Pyramids Network in details, with the code.
+
+Let's look precisely at which feature maps are used in FPN and how they are merged. I'll be working with ResNet-50 as the backbone, but this is can be applied to most other CNNs used for classification. For example, YOLOv3 uses a FPN with darknet as a backbone.
+
+I'll reguarlaly quote key passages from the FPN paper, starting with this one :
+
+> The construction of our pyramid involves a bottom-up pathway, a top-down pathway
+
+That can be seen in the illustrations above. Let's look at the the bottom-up pathway :
+
+> The bottom-up pathway is the feedforward computation of the backbone ConvNet, which computes a feature hierarchy consisting of feature maps at several scales with a scaling step of 2. There are often many
+> layers producing output maps of the same size and we say
+> these layers are in the same network stage. For our feature
+> pyramid, we define one pyramid level for each stage. We
+> choose the output of the last layer of each stage as our reference set of feature maps, which we will enrich to create
+> our pyramid. This choice is natural since the deepest layer
+> of each stage should have the strongest features.
+
+So in order to get the featture maps we need to take the last one of the all the ones of the same size. How to do that ?
+
+```python
+def _get_sfs_idxs(sizes:Sizes) -> List[int]:
+    feature_szs = [size[-1] for size in sizes]
+    sfs_idxs =
+      list(np.where(np.array(feature_szs[:-1]) != np.array(feature_szs[1:]))[0])
+    if feature_szs[0] != feature_szs[1]: sfs_idxs = [0] + sfs_idxs
+    return sfs_idxs
+```
+
+This function takes a list of sizes of the network (in this case it's the last element in each list in the list of sizes). (TODO : not very clear). Then we select the indices where the size of the layer change by comparing the array `a[:-1]` by the shifted-by-one `a[1:]`. In order for the two arrays to have the same length we didn't take into account the first pair of values, so we add 0 if necessary and then return the indices.
+
+So those are the indexes of the last layers of a given size. Which one do we choose for the FPN ? For ResNets the paper give us the answer, and it's very similar for other architectures.
+
+> Specifically, for ResNets we use the feature activations output by each stage’s last residual block. We denote
+> the output of these last residual blocks as {C2, C3, C4, C5}
+> for conv2, conv3, conv4, and conv5 outputs, and note that
+> they have strides of {4, 8, 16, 32} pixels with respect to the
+> input image. We do not include conv1 into the pyramid due
+> to its large memory footprint.
+
+So let's look at a ResNet-50 examples. To remind you, here's the structure of a ResNet-50 :
+
+TODO : insert media
+
+Here's the ouput of `model_sizes`:
+
+```python
+# batch size, number of channels, height, width
+[torch.Size([1, 64, 32, 32]),
+ torch.Size([1, 64, 32, 32]),
+ torch.Size([1, 64, 32, 32]),
+ torch.Size([1, 64, 16, 16]),
+ torch.Size([1, 256, 16, 16]),
+ torch.Size([1, 512, 8, 8]),
+ torch.Size([1, 1024, 4, 4]),
+ torch.Size([1, 2048, 2, 2])]
+```
+
+And accordingly here's the indexes of the layers C2, C3, C4 and C5 that interests us (this it the direct output of `_get_sfs_idxs`) :
+
+```python
+[2, 4, 5, 6]
+```
+
+Once we have determined the feature maps we need to use, it's time to perform the top-down pathway as described :
+
+> With a coarser-resolution feature map,
+> we upsample the spatial resolution by a factor of 2 (using
+> nearest neighbor upsampling for simplicity). The upsam3
+> pled map is then merged with the corresponding bottom-up
+> map (which undergoes a 1×1 convolutional layer to reduce
+> channel dimensions) by element-wise addition. This process is iterated until the finest resolution map is generated.
+> To start the iteration, we simply attach a 1×1 convolutional
+> layer on C5 to produce the coarsest resolution map. Finally, we append a 3×3 convolution on each merged map to
+> generate the final feature map, which is to reduce the aliasing effect of upsampling. This final set of feature maps is
+> called {P2, P3, P4, P5}, corresponding to {C2, C3, C4, C5}
+> that are respectively of the same spatial sizes.
+
+TODO : add media showing the upsampling and merging steps.
+
+In order to do this upsampling, let's create a class called `LateralUpsampleMerge` that will handle it :
+
+```python
+class LateralUpsampleMerge(nn.Module):
+    "Upsample a layer and adds the corresponding layer from the bottom-up path"
+    def __init__(self, ch, ch_lat, hook):
+        super().__init__()
+        # stores the activation of the backbone
+        self.hook = hook
+        # lateral connection
+        self.conv_lat = conv2d(ch_lat, ch, ks=1, bias=True)
+
+    def forward(self, x):
+        # add bottom-up and top-down pathway to form the lateral connection.
+        return self.conv_lat(self.hook.stored) + F.interpolate(x,scale_factor=2)
+```
+
+As you see, this class upsamlpe the layer `x` by a factor of 2 with the `nn.Functionnal` method `interpolate`, then adds it to the corresponding feature maps that passed through a 1x1 convolution. The activations of this feature map was stored through a hook that will be shown in the next piece of code.
+
+Now that we have the lateral and upsampling code, all there is left is to write the class that combines it all.
+
+```python
+class FPN(nn.Module):
+    def __init__(self, encoder:nn.Module, n_classes, final_bias=0., chs=256, n_anchors=9, flatten=True):
+        super().__init__()
+        self.n_classes,self.flatten = n_classes,flatten
+        imsize = (256,256)
+        # sfs_szs stores the size of all the layers of the encoder and hooks has the activations in hook.stored
+        sfs_szs = model_sizes(encoder, size=imsize)
+        # hook to store the activations
+        hooks = hook_outputs(encoder)
+        # indexes of final layer of each stage
+        sfs_idxs = _get_sfs_idxs(sfs_szs)
+        self.encoder = encoder
+        # compute P3 to P5
+        self.c5top5 = conv2d(sfs_szs[-1][1], chs, ks=1, bias=True)
+        # compute P6
+        self.c5top6 = conv2d(sfs_szs[-1][1], chs, stride=2, bias=True)
+        # compute P7
+        self.p6top7 = nn.Sequential(nn.ReLU(), conv2d(chs, chs, stride=2, bias=True))
+        # top-down and lateral connections
+        self.merges = nn.ModuleList([LateralUpsampleMerge(chs, szs[1], hook)
+                                     for szs,hook in zip(sfs_szs[-2:-4:-1], hooks[-2:-4:-1])])
+        # 3x3 conv2d used to eliminate aliasing caused by the upsampling
+        self.smoothers = nn.ModuleList([conv2d(chs, chs, 3, bias=True) for _ in range(3)])
+
+    def forward(self, x):
+        c5 = self.encoder(x)
+        # p[0] stores M5 (the top of the top-down pathway) and p[1] is the future P6
+        p_states = [self.c5top5(c5.clone()), self.c5top6(c5)]
+        # p[2] is the future P7
+        p_states.append(self.p6top7(p_states[-1]))
+        # take m5 and take it through the top-down pathway using the LateralUpsampleMerge instances stored in self.merges
+        # at the end of that line there's in p_states m5, m4, m3, m2 and two weird stuff -> TODO
+        for merge in self.merges: p_states = [merge(p_states[0])] + p_states
+        # apply anti-aliasing 3x3 conv2d
+        for i, smooth in enumerate(self.smoothers[:3]):
+            p_states[i] = smooth(p_states[i])
+        # first is the classifier head, then the regressor head, then HxW of output of FPN
+        return
+
+```

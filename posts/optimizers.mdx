@@ -1,0 +1,95 @@
+---
+title: 'A guide for optimizers: from Stochastic Gradient Descent to LAMB'
+date: '2019-04-16'
+tags: ['deep learning', 'paper review']
+layout: post
+type: 'post'
+draft: true
+---
+
+Model architecure is a very important aspect of Deep Learning, one we often think about. However, it can be easy to forget that any model would be useless without a way to make it converge towards a good solution. But that's easy right? You just use gradient descent! After a forward pass, you compute the loss, and then all the gradients of the loss with respect to the weights that you update accordingly. Boom.
+
+That method is indeed what is used to optimize the model. However, as with everything, a lot of refinement can make the process way more efficient. We gave name to those refinements that we call "optimizers", such as SGD, ADAM, or quite recently LAMB.
+
+In this article I will describe from scratch how widely used optimizers are working. A lot of the stuff discussed here come from lesson 11 of fast.ai. I'll be using custom Optimizer code taken from the corresponding notebook that works with PyTorch, but everything here is general and applicable outside of this framework.
+
+We'll implement together basic SGD, then SGD with momentum, ADAM, and finally LAMB.
+
+## Optimizer wrapper and Stochastic Gradient Descent
+
+First, we'll use a `Optimizer` class that will allow us to easily add new functionalities. Let's see the code and then explain it.
+
+A very basic, naive optimizer might look like this:
+
+```python
+class Optimizer():
+    def __init__(self, params, lr=0.5):
+        self.params,self.lr = list(params),lr
+
+    def step(self):
+        with torch.no_grad():
+            for p in self.params: p -= p.grad * lr
+
+    def zero_grad(self):
+        for p in self.params: p.grad.data.zero_()
+```
+
+In this class, we simply update the parameters by subtracting the gradients modulated by a learning rate `lr` with the `step` method, and then zero all the gradients with the `zero_grad` method.
+
+Simple, but it doesn't allow us to customize the Optimizer a lot. Here is a more complex Optimizer class. It might be bigger but it's not really much different:
+
+```python
+class Optimizer():
+    def __init__(self, params, steppers, **defaults):
+        # might be a generator
+        self.param_groups = list(params)
+        # ensure params is a list of lists
+        if not isinstance(self.param_groups[0], list): self.param_groups = [self.param_groups]
+        self.hypers = [{**defaults} for p in self.param_groups]
+        self.steppers = listify(steppers)
+
+    def grad_params(self):
+        return [(p,hyper) for pg,hyper in zip(self.param_groups,self.hypers)
+            for p in pg if p.grad is not None]
+
+    def zero_grad(self):
+        for p,hyper in self.grad_params():
+            p.grad.detach_()
+            p.grad.zero_()
+
+    def step(self):
+        for p,hyper in self.grad_params(): compose(p, self.steppers, **hyper)
+```
+
+First, in the `__init__` method:
+
+- `self.param_groups` is a list of different parameter groups (that might be useful for discriminative learning rate for example). We make sure that it's a list of lists, that is to say each element in `self.param_groups` is a group of parameters, and a group of parameters is a list of parameters.
+- `self.hypers` is a dictionary containing all the hyperparameters we might need for the optimizer, like for example the learning rate.
+- `self.steppers` is a list of the different 'steppers' we will use. Steppers are at the heart of how we'll add new functionalities to the optimizer. I'll explain it a bit later.
+
+Then, `grad_params` is a method that returns a list of two-tuples. Each of these tuples is a parameter and the hyperparameters dictionary. Only parameters with non-zero grad are returned TODO: why?
+
+The `zero_grad` method just zeroes all the gradients, as before. There is one addition which is `p.grad.detach_()`, see [here](http://www.bnikolic.co.uk/blog/pytorch-detach.html#) to understand how `detach_` works.
+
+Finally, the `step` method is where everything is happening. In this method, we loop through the parameters returned by `grad_params()` and compose them with the steppers. What does this mean? It means that each of the steppers function contained in `self.steppers` will be applied to `p` with the parameters contained in `hyper`.
+
+To further understand how `compose` works, this simplified piece of code:
+
+```python
+functions =  [f1, f2, f3]
+for p in params: compose(param, functions, **hyper)
+```
+
+does exactly the same thing as:
+
+```python
+for p in params: f3(f2(f1(param, **hyper), **hyper), **hyper)
+```
+
+So the "compose" function just loop through the functions provided and apply them to the first argument with the key-word arguments provided.
+
+## Adding Momentum
+
+## ADAM
+
+## LAMB

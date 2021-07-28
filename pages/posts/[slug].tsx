@@ -12,7 +12,12 @@ import path from 'path';
 import React from 'react';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypeSlug from 'rehype-slug';
+import rehypeKatex from 'rehype-katex';
+import math from 'remark-math';
+
 import Layout, { WEBSITE_HOST_URL } from '../../components/Layout';
+import TestComponent from '../../components/TestComponent';
+
 import { MetaProps } from '../../types/layout';
 import { PostType } from '../../types/post';
 import { postFilePaths, POSTS_PATH } from '../../utils/mdxUtils';
@@ -25,6 +30,7 @@ const components = {
   Head,
   Image,
   Link,
+  TestComponent,
 };
 
 type PostPageProps = {
@@ -40,8 +46,9 @@ const PostPage = ({ source, frontMatter }: PostPageProps): JSX.Element => {
     date: frontMatter.date,
     type: 'article',
   };
+
   return (
-    <Layout customMeta={customMeta}>
+    <Layout customMeta={customMeta} addMath={!!frontMatter?.hasMath}>
       <article>
         <h1 className="mb-3 text-gray-900 dark:text-white">
           {frontMatter.title}
@@ -66,8 +73,13 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const mdxSource = await serialize(content, {
     // Optionally pass remark/rehype plugins
     mdxOptions: {
-      remarkPlugins: [require('remark-code-titles')],
-      rehypePlugins: [mdxPrism, rehypeSlug, rehypeAutolinkHeadings],
+      remarkPlugins: [require('remark-code-titles'), math],
+      rehypePlugins: [
+        mdxPrism,
+        rehypeSlug,
+        rehypeAutolinkHeadings,
+        rehypeKatex,
+      ],
     },
     scope: data,
   });
