@@ -57,7 +57,13 @@ def train(train_dl, model, epoch, opt, loss_func):
 
 There are four main steps, shown in the following image:
 
-![fastai training loop](/fastai-callbacks/fastai_training_loop_vanilla.png#center)
+<Image
+  alt={`fastai training loop`}
+  src={`/fastai-callbacks/fastai_training_loop_vanilla.png`}
+  width={1440}
+  height={960}
+  priority
+/>
 
 <p align="center">fastai training loop, taken from Sylvain's talk. <br></br>
 The forward pass is computed between the "model" and the "loss”, and the backward
@@ -101,7 +107,13 @@ You can see that now we can modify our training loop pretty much however we want
 
 And the names are pretty self-explanatory: `callbacks.on_epoch_begin()` simply means "Hey there callback functions, I'm beginning a new epoch. Does someone here want to do something?" and `callbacks.on_step_end()` means "Hey, I've just taken an optimizer step and I'm about to zero the gradients. Anything to do now?".
 
-![fastai training loop](/fastai-callbacks/fastai_training_loop_callbacks.png#center)
+<Image
+  alt={`fastai training loop`}
+  src={`/fastai-callbacks/fastai_training_loop_callbacks.png`}
+  width={1440}
+  height={960}
+  priority
+/>
 
 <p align="center">
 fastai training loop with callbacks, taken from Sylvain's talk
@@ -172,7 +184,7 @@ Hopefully you're now getting what a callback is and where the callbacks are used
 
 #### Gradient clipping
 
-One recurrent issue of deep neural networks is the vanishing or the exploding of the gradient. A good initialization can go a long way towards minimizing that phenomenon ([see my post about Xavier and Kaiming initialization]({{< ref "/blog/initialization.md" >}})). Another often used technique is gradient clipping, in which you simply don't allow the gradient to get too big; if it does, you "clip" it.
+One recurrent issue of deep neural networks is the vanishing or the exploding of the gradient. A good initialization can go a long way towards minimizing that phenomenon ([see my post about Xavier and Kaiming initialization]({{< ref "/blog/initialization.md$)). Another often used technique is gradient clipping, in which you simply don't allow the gradient to get too big; if it does, you "clip" it.
 
 [Gradient Clipping](https://docs.fast.ai/train.html#GradientClipping) is implemented as a simple callback in the fastai library. Here is the full code:
 

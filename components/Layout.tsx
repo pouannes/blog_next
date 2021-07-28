@@ -23,8 +23,8 @@ const Layout = ({
       {addMath ? (
         <link
           rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/katex@0.11.0/dist/katex.min.css"
-          integrity="sha384-BdGj8xC2eZkQaxoQ8nSLefg4AV4/AwB3Fj+8SUSo7pnKP6Eoy18liIKTPn9oBYNG"
+          href="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.css"
+          integrity="sha384-RZU/ijkSsFbcmivfdRBQDtwuwVqK7GMOw6IMvKyeWL2K5UAlyp6WonmB8m7Jd0Hn"
           crossOrigin="anonymous"
         />
       ) : null}

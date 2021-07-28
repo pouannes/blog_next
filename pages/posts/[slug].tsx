@@ -78,7 +78,17 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
         mdxPrism,
         rehypeSlug,
         rehypeAutolinkHeadings,
-        rehypeKatex,
+        [
+          rehypeKatex,
+          {
+            trust: true,
+            macros: {
+              '\\eqref': '\\href{###1}{(\\text{#1})}',
+              '\\ref': '\\href{###1}{\\text{#1}}',
+              '\\label': '\\htmlId{#1}{}',
+            },
+          },
+        ],
       ],
     },
     scope: data,
