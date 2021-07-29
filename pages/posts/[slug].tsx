@@ -17,6 +17,7 @@ import math from 'remark-math';
 
 import Layout, { WEBSITE_HOST_URL } from '../../components/Layout';
 import NoticeBox from '../../components/NoticeBox';
+import MaxWidth from '../../components/MaxWidth';
 
 import { MetaProps } from '../../types/layout';
 import { PostType } from '../../types/post';
@@ -31,6 +32,7 @@ const components = {
   Image,
   Link,
   NoticeBox,
+  MaxWidth,
 };
 
 type PostPageProps = {
@@ -49,17 +51,19 @@ const PostPage = ({ source, frontMatter }: PostPageProps): JSX.Element => {
 
   return process.env.NODE_ENV !== 'development' && frontMatter.draft ? null : (
     <Layout customMeta={customMeta} addMath={!!frontMatter?.hasMath}>
-      <article>
-        <h1 className="mb-3 text-gray-900 dark:text-white">
-          {frontMatter.title}
-        </h1>
-        <p className="mb-10 text-sm text-gray-500 dark:text-gray-400">
-          {format(parseISO(frontMatter.date), 'MMMM dd, yyyy')}
-        </p>
-        <div className="prose dark:prose-dark">
-          <MDXRemote {...source} components={components} />
-        </div>
-      </article>
+      <div className="flex flex-col items-center px-2">
+        <article className="w-full max-w-prose">
+          <h1 className="mb-3 text-gray-900 dark:text-white">
+            {frontMatter.title}
+          </h1>
+          <p className="mb-10 text-sm text-gray-500 dark:text-gray-400">
+            {format(parseISO(frontMatter.date), 'MMMM dd, yyyy')}
+          </p>
+          <div className="prose dark:prose-dark">
+            <MDXRemote {...source} components={components} />
+          </div>
+        </article>
+      </div>
     </Layout>
   );
 };

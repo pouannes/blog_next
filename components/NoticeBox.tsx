@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import { QuestionMarkCircleIcon } from '@heroicons/react/solid';
 
 type NoticeBoxProps = {

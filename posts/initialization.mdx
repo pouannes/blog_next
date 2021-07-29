@@ -145,6 +145,8 @@ $$
 
 We then take the variance of that expression; the right handside is now equal to the trace of the variance-covariance matrix. Only the diagonal is not equal to zero: because of the independence of the variables, the covariances are null:
 
+<MaxWidth>
+
 $$
 \begin{split}
  Var[W_l\boldsymbol{x_l}]
@@ -160,13 +162,21 @@ $$
 \end{split}
 $$
 
+</MaxWidth>
+
 But because all the $w_{i,j}$ and the $x_i$ are independent from each other, the variance of the sum is the sum of the variances. Thus:
+
+<MaxWidth>
 
 $$
 Var[W_l\boldsymbol{x_l}] = \sum_{k = 1}^{d_l} \sum_{j=1}^{n_l} Var\left[w_{k, j} x_j\right]
 $$
 
+</MaxWidth>
+
 And because all the $w_{i,j}$ and $x_i$ follow the same distribution (respectively), all the variances are equal to a common variance we note $Var[w_l x_l]$. Hence:
+
+<MaxWidth>
 
 $$
 \begin{split}
@@ -176,6 +186,8 @@ Var[W_l\boldsymbol{x_l}]
 \end{split}
 $$
 
+</MaxWidth>
+
 Following the exact same reasoning, albeit more simply because there's no product, we obtain:
 
 $$
@@ -184,13 +196,19 @@ $$
 
 As I said, the biases are initialized to 0 thus $Var[\boldsymbol{b_l}] = 0$. Putting it all together we obtain equation $\eqref{2}$ back:
 
+<MaxWidth>
+
 $$
 d_l \times Var[y_l] = d_l \times n_l \times Var[w_lx_l] \Longleftrightarrow Var[y_l] = n_l Var[w_lx_l]
 $$
 
+</MaxWidth>
+
 Pfiu. That was a mouthful. Let's go on!
 
 We now make one more assumption: that the random variable $w_l$ has zero mean. After all, setting the distribution of $w_l$ is what we're trying to do here, so we can choose one that has zero mean. We can now further simplify equation $\eqref{2}$ as follow (we also use once more the fact that $w_l$ and $x_l$ are independent):
+
+<MaxWidth>
 
 $$
 \begin{align}
@@ -202,6 +220,8 @@ Var[y_l]
 \end{split}
 \end{align}
 $$
+
+</MaxWidth>
 
 In those formulas, $\mathbb{E}[x_l^2]$ refers to the expectation of the square of $x_l$.
 
@@ -215,15 +235,23 @@ $$
 
 Now let's see what to do with $\mathbb{E}[x_{l}^2] = \mathbb{E}[max(0, y_{l-1})^2]$. We assume that $w_{l-1}$ has a symmetric distribution around 0 and that $b_{l-1} = 0$. Then $y_{l-1}$ will also have a symmetric distribution around 0, and will have zero mean. Indeed, taking the expectation of equation $\eqref{1}$ gives us (because $w_{l-1}$ has zero mean and is independent from $x_{l-1}$):
 
+<MaxWidth>
+
 $$
 \mathbb{E}(y_{l-1}) = \mathbb{E}(w_{l-1} x_{l-1}) = \mathbb{E}(w_{l-1})\mathbb{E}(x_{l-1}) = 0
 $$
 
+</MaxWidth>
+
 And because $w_{l-1}$ has zero mean and is distributed symmetrically around 0:
+
+<MaxWidth>
 
 $$
 \begin{split} \mathbb{P}(y_{l-1} > 0) &= \mathbb{P} ( w_{l-1}x_{l-1} > 0) \\ &= \mathbb{P}\left( (w_{l-1} > 0 \text{ and } x_{l-1} > 0 ) \text{ or } (w_{l-1} < 0 \text{ and } x_{l-1} < 0)\right) \\ &= \mathbb{P}(w_{l-1} >0 ) \mathbb{P}(x_{l-1} > 0) + \mathbb{P}(w_{l-1} < 0 ) \mathbb{P}(x_{l-1} < 0) \\ &= \frac{1}{2} \mathbb{P} ( x_{l-1} > 0) + \frac{1}{2} \mathbb{P} ( x_{l-1} < 0) \\ &= \frac{1}{2} \end{split}
 $$
+
+</MaxWidth>
 
 Now that we have established that $y_{l-1}$ is indeed centered on 0 and symmetric, we can compute the expectation of $x_l^2$:
 
@@ -306,6 +334,8 @@ $$
 
 and because $\Delta y_l$ has a zero mean, and that $f'(y_l)^2 = f'(y_l)$, by taking the expectation of the square of the equation $\Delta y_l = f'(y_l) \Delta x_{l+1}$, we get:
 
+<MaxWidth>
+
 $$
 \begin{split}
 \mathbb{E}\left[(\Delta y_l)^2\right] = Var[\Delta y_l]
@@ -314,6 +344,8 @@ $$
   &= \frac{1}{2} Var[\Delta x_{l+1}]
 \end{split}
 $$
+
+</MaxWidth>
 
 To remind you, we do have $\mathbb{E}(\Delta x_{l+1} ^2) = Var[\Delta x_{l+1}]$ because $\Delta x_{l+1}$ has zero mean as we just demonstrated.
 
@@ -331,11 +363,15 @@ $$
 
 As before, we have a recurrence equation. This time it's on $\Delta x_l$ rather than $y_l$, but we can turn it into a product over all the $L$ layers all the same:
 
+<MaxWidth>
+
 $$
 \begin{align}
  Var[\Delta x_2] = Var[\Delta x_{L+1}] \left( \prod_{l=2}^{L} \frac{1}{2} \hat{n}_l Var[w_l] \right)  \label{9}
  \end{align}
 $$
+
+</MaxWidth>
 
 Remember $x_1$ is the input of the network, that's why the above equation "begins" at 2.
 
