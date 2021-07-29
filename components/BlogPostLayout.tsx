@@ -30,6 +30,8 @@ const BlogPostLayout = ({
           </h1>
           <p className="mb-10 text-sm text-gray-500 dark:text-gray-400">
             {format(parseISO(frontMatter.date), 'MMMM dd, yyyy')}
+            {` • `}
+            {frontMatter.readingTime.text}
           </p>
           <div className="prose dark:prose-dark">{children}</div>
         </article>
