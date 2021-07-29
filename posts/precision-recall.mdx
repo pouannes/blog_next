@@ -285,7 +285,8 @@ $$
 
 As you can see, the $F_1$ score is the weighted average of Precision and Recall. More precisely, it is the harmonic mean of precision and recall. It's very useful to look at the $F_1$ score when you're trying to balance the precision/recall tradeoff.
 
-{{% notice tip %}}
+<NoticeBox variant='focus'>
+
 Why is the harmonic mean used instead of the classic arithmetic mean? To understand, let's look at a classifier with a precision of 1 and a recall of 0.2. That classifier is quite poor : it detects only 20% of the sick patients. The arithmetic mean of precision and recall would be 0.6 in that case. The harmonic mean would be:
 
 $$
@@ -293,7 +294,8 @@ $$
 $$
 
 Indeed, 0.333... seems like a better score than 0.6.
-{{% /notice %}}
+
+</NoticeBox>
 
 Here's the relevant python code.
 
@@ -309,7 +311,8 @@ $$
 
 When $\beta = 1$, the $F_\beta$ score is equal to $F_1$. If $\beta > 1$, the score puts more importance on recall, and if $\beta < 1$, the score puts more importance on precision.
 
-{{% notice note %}}
+<NoticeBox variant='definition' marginBottom={true}>
+
 How is $\beta$ defined? The exact definition is the following:
 
 $$
@@ -317,11 +320,14 @@ $$
 $$
 
 What you need to understand from this definition is that $\beta$ is the ratio between precision and recall. The second bit shouldn't really concern you as you are the one manually setting $\beta$ in most cases (it can be seen as an advice of how to fix $\beta$).
-{{% /notice %}}
 
-{{% notice tip %}}
+</NoticeBox>
+
+<NoticeBox variant='focus' >
+
 You might ask why is there a $\beta^2$ in the formula instead of a simple $\beta$. That comes from how the $F_ \beta$ score was built by Van Rijsbergen. At the beginning $F_ \beta$ was defined via another measure called effectiveness as $E = 1 - F_\beta$. $\beta$ was set to replace the $\alpha$ parameter in the definition of $E$, and if you do the calculation you end up with $\alpha = \frac{1}{\beta^2 + 1}$. If you're interested in the details, [see this paper that explains it well](https://www.cs.odu.edu/~mukka/cs795sum10dm/Lecturenotes/Day3/F-measure-YS-26Oct07.pdf).
-{{% /notice %}}
+
+</NoticeBox>
 
 Finally, here's the code for computing $F_\beta$.
 

@@ -16,7 +16,7 @@ import rehypeKatex from 'rehype-katex';
 import math from 'remark-math';
 
 import Layout, { WEBSITE_HOST_URL } from '../../components/Layout';
-import TestComponent from '../../components/TestComponent';
+import NoticeBox from '../../components/NoticeBox';
 
 import { MetaProps } from '../../types/layout';
 import { PostType } from '../../types/post';
@@ -30,7 +30,7 @@ const components = {
   Head,
   Image,
   Link,
-  TestComponent,
+  NoticeBox,
 };
 
 type PostPageProps = {

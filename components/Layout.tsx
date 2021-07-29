@@ -38,7 +38,9 @@ const Layout = ({
         </div>
       </header>
       <main>
-        <div className="max-w-5xl px-8 py-4 mx-auto">{children}</div>
+        <div className="max-w-5xl px-8 py-4 mx-auto text-justify">
+          {children}
+        </div>
       </main>
       <footer className="py-8">
         <div className="max-w-5xl px-8 mx-auto">

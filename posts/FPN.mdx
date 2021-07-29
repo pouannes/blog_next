@@ -46,9 +46,11 @@ What you need to understand though is that in the SSD architecture each bounding
 
 The way SSD deals with that issue is to work on bounding boxes from different feature maps so they may have different receptive fields. However, the feature maps used are often small ones, late in the network, because they are feature-rich. Being feature-rich is good for detecting objects, and being small is good because there's less bounding boxes so less computation. However, those feature maps lack resolution as they are highly processed and thus they are still quite bad as detecting small objects.
 
-{{% notice note %}}
+<NoticeBox variant='focus'>
+
 **Rich semantics and high resolution** <br></br> What do I mean by rich semantics and high resolution ? TODO
-{{% /notice %}}
+
+</NoticeBox>
 
 To recap, SSD is great because it merges the two stages of R-CNN into a single one, making it way faster (and also more accurate, partly because it's easier to train). However, SSD has trouble with detecting objects of very different sizes, and in particular object of small sizes, because the bounding boxes proposal are made from small feature maps that are rich in semantic information but low in resolution.
 

@@ -20,6 +20,7 @@
     ]
   },
   "dependencies": {
+    "@heroicons/react": "^1.0.3",
     "@tailwindcss/typography": "^0.4.1",
     "date-fns": "^2.19.0",
     "gray-matter": "^4.0.2",
