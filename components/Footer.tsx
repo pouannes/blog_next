@@ -2,8 +2,8 @@ import Link from 'next/link';
 
 const Footer = (): JSX.Element => {
   return (
-    <div className="flex flex-col max-w-[44rem] mx-auto border-t border-gray-200 py-8 mt-8 mb-20">
-      <p className="text-gray-700">Pierre Ouannes</p>
+    <div className="flex flex-col max-w-[44rem] mx-auto border-t border-gray-200 dark:border-gray-600 py-8 mt-8 mb-20">
+      <p className="text-gray-700 dark:text-gray-200">Pierre Ouannes</p>
       <div className="flex justify-between">
         <div className="flex flex-col">
           <Link href="/">
@@ -41,7 +41,7 @@ const StyledLink = ({
 }: React.AnchorHTMLAttributes<HTMLAnchorElement>): JSX.Element => {
   return (
     <a
-      className={`py-2 my-2 text-gray-500 hover:text-gray-700 hover:cursor-pointer ${className}`}
+      className={`py-2 my-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:cursor-pointer ${className}`}
       {...props}
     >
       {children}
