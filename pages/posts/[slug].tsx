@@ -18,11 +18,13 @@ import math from 'remark-math';
 import Layout, { WEBSITE_HOST_URL } from '../../components/Layout';
 import NoticeBox from '../../components/NoticeBox';
 import MaxWidth from '../../components/MaxWidth';
-import InternalLink from '../../components/InternalLink';
+import CustomLink from '../../components/CustomLink';
 
 import { MetaProps } from '../../types/layout';
 import { PostType } from '../../types/post';
 import { postFilePaths, POSTS_PATH } from '../../utils/mdxUtils';
+import readingTime from 'reading-time';
+import BlogPostLayout from '../../components/BlogPostLayout';
 
 // Custom components/renderers to pass to MDX.
 // Since the MDX files aren't loaded by webpack, they have no knowledge of how
@@ -34,8 +36,7 @@ const components = {
   Link,
   NoticeBox,
   MaxWidth,
-  InternalLink,
-  a: (props) => <a target="_blank" rel="noreferrer" {...props} />,
+  a: CustomLink,
 };
 
 type PostPageProps = {
@@ -44,30 +45,10 @@ type PostPageProps = {
 };
 
 const PostPage = ({ source, frontMatter }: PostPageProps): JSX.Element => {
-  const customMeta: MetaProps = {
-    title: `${frontMatter.title} - Pierre Ouannes`,
-    description: frontMatter.description,
-    image: `${WEBSITE_HOST_URL}${frontMatter.image}`,
-    date: frontMatter.date,
-    type: 'article',
-  };
-
   return process.env.NODE_ENV !== 'development' && frontMatter.draft ? null : (
-    <Layout customMeta={customMeta} addMath={!!frontMatter?.hasMath}>
-      <div className="flex flex-col items-center px-2">
-        <article className="w-full max-w-prose">
-          <h1 className="mb-3 text-gray-900 dark:text-white">
-            {frontMatter.title}
-          </h1>
-          <p className="mb-10 text-sm text-gray-500 dark:text-gray-400">
-            {format(parseISO(frontMatter.date), 'MMMM dd, yyyy')}
-          </p>
-          <div className="prose dark:prose-dark">
-            <MDXRemote {...source} components={components} />
-          </div>
-        </article>
-      </div>
-    </Layout>
+    <BlogPostLayout frontMatter={frontMatter}>
+      <MDXRemote {...source} components={components} />
+    </BlogPostLayout>
   );
 };
 
@@ -104,7 +85,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   return {
     props: {
       source: mdxSource,
-      frontMatter: data,
+      frontMatter: { readingTime: readingTime(content), ...data },
     },
   };
 };
