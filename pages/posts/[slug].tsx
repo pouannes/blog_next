@@ -33,6 +33,7 @@ const components = {
   Link,
   NoticeBox,
   MaxWidth,
+  a: (props) => <a target="_blank" rel="noreferrer" {...props} />,
 };
 
 type PostPageProps = {
