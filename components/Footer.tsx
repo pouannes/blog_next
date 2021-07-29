@@ -15,18 +15,26 @@ const Footer = (): JSX.Element => {
         </div>
         <div className="flex flex-col">
           <StyledLink
+            href="https://github.com/pouannes"
+            target="_blank"
+            rel="noreferrer"
+          >
+            GitHub
+          </StyledLink>
+          <StyledLink
             href="https://twitter.com/PierreOuannes"
             target="_blank"
             rel="noreferrer"
           >
             Twitter
           </StyledLink>
+
           <StyledLink
-            href="https://github.com/pouannes"
+            href="https://www.linkedin.com/in/pierre-ouannes"
             target="_blank"
             rel="noreferrer"
           >
-            GitHub
+            LinkedIn
           </StyledLink>
         </div>
       </div>

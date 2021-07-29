@@ -18,6 +18,7 @@ import math from 'remark-math';
 import Layout, { WEBSITE_HOST_URL } from '../../components/Layout';
 import NoticeBox from '../../components/NoticeBox';
 import MaxWidth from '../../components/MaxWidth';
+import InternalLink from '../../components/InternalLink';
 
 import { MetaProps } from '../../types/layout';
 import { PostType } from '../../types/post';
@@ -33,6 +34,7 @@ const components = {
   Link,
   NoticeBox,
   MaxWidth,
+  InternalLink,
   a: (props) => <a target="_blank" rel="noreferrer" {...props} />,
 };
 
