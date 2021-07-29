@@ -3,6 +3,7 @@ import { MetaProps } from '../types/layout';
 import Head from './Head';
 import Navigation from './Navigation';
 import ThemeSwitch from './ThemeSwitch';
+import Footer from './Footer';
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -30,7 +31,7 @@ const Layout = ({
       ) : null}
 
       <header>
-        <div className="max-w-5xl px-8 mx-auto">
+        <div className="max-w-3xl px-8 mx-auto">
           <div className="flex items-center justify-between py-6">
             <Navigation />
             <ThemeSwitch />
@@ -38,21 +39,11 @@ const Layout = ({
         </div>
       </header>
       <main>
-        <div className="max-w-5xl px-8 py-4 mx-auto text-justify">
+        <div className="max-w-3xl px-8 py-4 mx-auto text-justify">
           {children}
         </div>
       </main>
-      <footer className="py-8">
-        <div className="max-w-5xl px-8 mx-auto">
-          Built by{' '}
-          <a
-            className="text-gray-900 dark:text-white"
-            href="https://twitter.com/huntarosan"
-          >
-            Hunter Chang
-          </a>
-        </div>
-      </footer>
+      <Footer />
     </>
   );
 };
