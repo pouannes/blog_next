@@ -206,19 +206,18 @@ $$
 
 Pfiu. That was a mouthful. Let's go on!
 
-We now make one more assumption: that the random variable $w_l$ has zero mean. After all, setting the distribution of $w_l$ is what we're trying to do here, so we can choose one that has zero mean. We can now further simplify equation $\eqref{2}$ as follow (we also use once more the fact that $w_l$ and $x_l$ are independent):
+We now make one more assumption: that the random variable $w_l$ has zero mean. After all, setting the distribution of $w_l$ is what we're trying to do here, so we can choose one that has zero mean. We can now further simplify equation $\eqref{2}$ as follow (we also use once more the fact that $w_l$ and $x_l$ are independent) $(3)$:
+$\label{3}$
 
 <MaxWidth>
 
 $$
-\begin{align}
 \begin{split}
 Var[y_l]
   &= n_l Var[w_lx_l]  \\ \\
   &= n_l \left( \underbrace{\mathbb{E}[w_l^2]}_{=Var[w_l]} \mathbb{E}[x_l^2] - \underbrace{\mathbb{E}[w_l]^2}_{=0}\mathbb{E}[x_l]^2 \right)  \\ \\
-   &=   n_l Var[w_l] \mathbb{E}[x_l^2] \label{3}   \
+   &=   n_l Var[w_l] \mathbb{E}[x_l^2]  \
 \end{split}
-\end{align}
 $$
 
 </MaxWidth>
@@ -270,28 +269,26 @@ $$
 Var[y_l] = \frac{1}{2} n_l Var[w_l] Var[y_{l-1}]
 $$
 
-Bingo! We now have a recurrence equation between the activations at layer $l$ and the activations at layer $l-1$. Starting from the last layer $L$, we can thus form the following product:
+Bingo! We now have a recurrence equation between the activations at layer $l$ and the activations at layer $l-1$. Starting from the last layer $L$, we can thus form the following product: $(4)$ $\label{4}$
 
 $$
-\begin{align}
- Var[y_L] = Var[y_1] \left( \prod_{l=2}^{L} \frac{1}{2} n_l Var[w_l] \right) \label{4}
-\end{align}
+ Var[y_L] = Var[y_1] \left( \prod_{l=2}^{L} \frac{1}{2} n_l Var[w_l] \right)
 $$
 
-This formula is the one that lets us see what could go wrong without a proper initialization, and thus how to design the right one. The product is key. Indeed, if we have a lot of layers (so if $L$ is large), we see that the variance of the last layer $y_L$ could be very small (if $\frac{1}{2} n_l Var[w_l]$ is below 1) or very large ( if $\frac{1}{2} n_l Var[w_l]$ is above 1). The proper value for what's inside that product should thus be 1, and that is exactly the sufficient condition the Kaiming paper (and initialization) takes:
+This formula is the one that lets us see what could go wrong without a proper initialization, and thus how to design the right one. The product is key. Indeed, if we have a lot of layers (so if $L$ is large), we see that the variance of the last layer $y_L$ could be very small (if $\frac{1}{2} n_l Var[w_l]$ is below 1) or very large ( if $\frac{1}{2} n_l Var[w_l]$ is above 1). The proper value for what's inside that product should thus be 1, and that is exactly the sufficient condition the Kaiming paper (and initialization) takes: $(5)$ $\label{5}$
 
 $$
-\begin{align} \forall l \,, \; \frac{1}{2} n_l Var[w_l] = 1 \label{5} \end{align}
+ \forall l \,, \; \frac{1}{2} n_l Var[w_l] = 1
 $$
 
 The Kaiming paper accordingly suggests to initialize the weights of layer $l$ with a zero-mean Gaussian distribution with a standard deviation of $\sqrt{\frac{2}{n_l}}$, and null biases.
 
 The standard deviation of the first layer isn't that important. Indeed, looking at equation $\eqref{4}$ we can see that the variance of the first layer won't contribute to an exponentially small or large variance at the last layer. For simplicity, we also use the same equation $\eqref{5}$ to define the standard deviation of the first layer, even though to be 100% rigorous that would lead to a variance of 1/2, because there is not ReLU applied to the input.
 
-That's it for the Kaiming initialization in the forward case! Xavier initialization is a tiny bit different: as the activation function was assumed to be linear by Xavier (or at least approximated to be linear with a derivative of 1 around 0), it's not taken into account, and thus the 1/2 that comes from ReLU isn't there. The Xavier initialization formula in the forward case is hence:
+That's it for the Kaiming initialization in the forward case! Xavier initialization is a tiny bit different: as the activation function was assumed to be linear by Xavier (or at least approximated to be linear with a derivative of 1 around 0), it's not taken into account, and thus the 1/2 that comes from ReLU isn't there. The Xavier initialization formula in the forward case is hence: $(6)$ $\label{6}$
 
 $$
-\begin{align} \forall l \,, \; n_l Var[w_l] = 1 \label{6} \end{align}
+ \forall l \,, \; n_l Var[w_l] = 1
 $$
 
 Let's tackle back-prop now!
@@ -300,10 +297,10 @@ Let's tackle back-prop now!
 
 The backward-propagation story is very similar to the forward-propagation one. The only difference is that we're dealing with gradients, and that the flow is now from the last layers to the first ones. Accordingly, we'll have a very similar but still slightly different result.
 
-Instead of the forward-propagation equation $\eqref{1}$ we had, the formula of the gradient of layer $l$ is given by:
+Instead of the forward-propagation equation $\eqref{1}$ we had, the formula of the gradient of layer $l$ is given by: $(7)$ $\label{7}$
 
 $$
-\begin{align}\Delta \boldsymbol{x_l} = \hat{W}_l \Delta \boldsymbol{y_l} \label{7} \end{align}
+\Delta \boldsymbol{x_l} = \hat{W}_l \Delta \boldsymbol{y_l}
 $$
 
 Notice the bold symbols again. Sneaky sneaky. The terms of equation $\eqref{7}$ are defined as follow:
@@ -349,48 +346,46 @@ $$
 
 To remind you, we do have $\mathbb{E}(\Delta x_{l+1} ^2) = Var[\Delta x_{l+1}]$ because $\Delta x_{l+1}$ has zero mean as we just demonstrated.
 
-We now have everything we need to compute the variance of equation $\eqref{7}$, with the exact same reasoning we had with the forward case (remember the big matrices?):
+We now have everything we need to compute the variance of equation $\eqref{7}$, with the exact same reasoning we had with the forward case (remember the big matrices?): $(8)$ $\label{8}$
 
 $$
-\begin{align}
 \begin{split}
 Var[\Delta x_l] &= Var[\hat{W}_l \Delta \boldsymbol{y_l}]  \\
   &= \hat{n}_l Var[w_l] Var[\Delta y_l]  \\
   &= \frac{1}{2} \hat{n}_l Var[w_l]Var[\Delta x_{l+1}]
 \end{split}
-\end{align}
 $$
 
-As before, we have a recurrence equation. This time it's on $\Delta x_l$ rather than $y_l$, but we can turn it into a product over all the $L$ layers all the same:
+As before, we have a recurrence equation. This time it's on $\Delta x_l$ rather than $y_l$, but we can turn it into a product over all the $L$ layers all the same: $(9)$ $\label{9}$
 
 <MaxWidth>
 
 $$
-\begin{align}
- Var[\Delta x_2] = Var[\Delta x_{L+1}] \left( \prod_{l=2}^{L} \frac{1}{2} \hat{n}_l Var[w_l] \right)  \label{9}
- \end{align}
+\begin{split}
+ Var[\Delta x_2] = Var[\Delta x_{L+1}] \left( \prod_{l=2}^{L} \frac{1}{2} \hat{n}_l Var[w_l] \right)
+ \end{split}
 $$
 
 </MaxWidth>
 
 Remember $x_1$ is the input of the network, that's why the above equation "begins" at 2.
 
-Again, as before, this product is key to understanding why the right initialization is so important: if not set carefully, the gradient can explode or vanish, depending on wether $\frac{1}{2} \hat{n}_l Var[w_l]$ is over or below 1 (strictly). Setting that number to 1 is important:
+Again, as before, this product is key to understanding why the right initialization is so important: if not set carefully, the gradient can explode or vanish, depending on wether $\frac{1}{2} \hat{n}_l Var[w_l]$ is over or below 1 (strictly). Setting that number to 1 is important: $(10)$ $\label{10}$
 
 $$
-\begin{align}
-\forall l \,, \; \frac{1}{2}\hat{n}_l Var[w_l] = 1  \label{10}
-\end{align}
+\begin{split}
+\forall l \,, \; \frac{1}{2}\hat{n}_l Var[w_l] = 1
+\end{split}
 $$
 
 Thus we can choose a distribution with a standard deviation of $\sqrt{\frac{2}{\hat{n}_l}}$. Lastly, same as before, the first layer wouldn't be at the same standard deviation because no activation function is used, but the small 1/2 factor doesn't matter because it doesn't get compounded over $L$ layers.
 
-The difference between this Kaiming initialization and the Xavier one is again the 1/2 that comes from the ReLU activation function. Careful, that 1/2 isn't the one I've just talked about in the previous paragraph, and it's not even coming the same way from the ReLU. The Xavier initialization in the backward-propagation case comes from the equation:
+The difference between this Kaiming initialization and the Xavier one is again the 1/2 that comes from the ReLU activation function. Careful, that 1/2 isn't the one I've just talked about in the previous paragraph, and it's not even coming the same way from the ReLU. The Xavier initialization in the backward-propagation case comes from the equation: $(11)$ $\label{11}$
 
 $$
-\begin{align}
-\forall l \,, \; \hat{n}_l Var[w_l] = 1  \label{11}
-\end{align}
+\begin{split}
+\forall l \,, \; \hat{n}_l Var[w_l] = 1
+\end{split}
 $$
 
 Yay! We figured out backward-propagation!
