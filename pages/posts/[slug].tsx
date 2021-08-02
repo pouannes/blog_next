@@ -1,4 +1,3 @@
-import { format, parseISO } from 'date-fns';
 import fs from 'fs';
 import matter from 'gray-matter';
 import mdxPrism from 'mdx-prism';
@@ -15,12 +14,10 @@ import rehypeSlug from 'rehype-slug';
 import rehypeKatex from 'rehype-katex';
 import math from 'remark-math';
 
-import Layout, { WEBSITE_HOST_URL } from '../../components/Layout';
 import NoticeBox from '../../components/NoticeBox';
 import MaxWidth from '../../components/MaxWidth';
 import CustomLink from '../../components/CustomLink';
 
-import { MetaProps } from '../../types/layout';
 import { PostType } from '../../types/post';
 import { postFilePaths, POSTS_PATH } from '../../utils/mdxUtils';
 import readingTime from 'reading-time';
