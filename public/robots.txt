@@ -1,2 +1,2 @@
 User-agent: *
-Sitemap: https://pierreouannes.io/sitemap.xml
+Sitemap: https://pierreouannes.com/sitemap.xml
