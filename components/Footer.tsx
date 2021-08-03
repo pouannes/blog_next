@@ -38,10 +38,8 @@ const Footer = (): JSX.Element => {
           </StyledLink>
         </div>
       </div>
-      <p className="text-gray-500">
-        <small>
-          &copy; Copyright {new Date().getFullYear()}, Pierre Ouannes
-        </small>
+      <p className="text-gray-400 ">
+        &copy; Copyright 2018-{new Date().getFullYear()}, Pierre Ouannes
       </p>
     </footer>
   );
