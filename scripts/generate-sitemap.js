@@ -12,6 +12,7 @@ const prettier = require('prettier');
     '!pages/_*.js',
     '!pages/_*.ts*',
     '!pages/api',
+    '!posts/**/_*.mdx',
   ]);
 
   const sitemap = `
