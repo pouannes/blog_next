@@ -39,7 +39,7 @@ const Layout = ({
         </div>
       </header>
       <main>
-        <div className="max-w-3xl px-8 py-4 mx-auto text-justify">
+        <div className="max-w-3xl px-8 py-4 mx-auto text-left sm:text-justify">
           {children}
         </div>
       </main>

@@ -34,6 +34,12 @@ const components = {
   NoticeBox,
   MaxWidth,
   a: CustomLink,
+  h2: ({ className, ...props }) => (
+    <h2 className={`text-left ${className}`} {...props} />
+  ),
+  h3: ({ className, ...props }) => (
+    <h3 className={`text-left ${className}`} {...props} />
+  ),
 };
 
 type PostPageProps = {
