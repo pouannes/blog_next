@@ -28,7 +28,7 @@ const NoticeBox = ({
           {variant.charAt(0).toUpperCase() + variant.slice(1)}
         </span>
       </div>
-      <div className="px-4 pb-1 -mt-1">{children}</div>
+      <div className="px-4 pb-1 -mt-1 text-gray-700">{children}</div>
     </div>
   );
 };
